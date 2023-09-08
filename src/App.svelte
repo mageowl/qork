@@ -1,39 +1,39 @@
 <script lang="ts">
-  import Greet from './lib/Greet.svelte'
+	let gridSize = 40
+	let viewX = 0;
+	let viewY = 0;
+
+	$: cssGridPosition = {
+		x: (viewX < 0 ? viewX + (Math.floor(viewX / gridSize) * -gridSize) : viewX) % gridSize,
+		y: (viewY < 0 ? viewY + (Math.floor(viewY / gridSize) * -gridSize) : viewY) % gridSize
+	} 
+	$: console.log(cssGridPosition);
+
+	let dragStart: {x: number, y: number, viewX: number, viewY: number} | null = null;
+
+	function drag(e: MouseEvent) {
+		if (dragStart == null) return;
+
+		viewX = dragStart.viewX + e.clientX - dragStart.x;
+		viewY = dragStart.viewY + e.clientY - dragStart.y;
+	}
+
+	function endDrag() {
+		dragStart = null
+	}
 </script>
 
-<main class="container">
-  <h1>Welcome to Tauri!</h1>
+<svelte:window 
+	on:mousedown={(e) => dragStart = {x: e.clientX, y: e.clientY, viewX: viewX, viewY: viewY}}
+	on:mousemove={drag}
+	on:mouseup={endDrag}
+/>
 
-  <div class="row">
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-    </a>
-    <a href="https://tauri.app" target="_blank">
-      <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank">
-      <img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class='grid' 
+	style:--grid-x='{cssGridPosition.x}px' 
+	style:--grid-y='{cssGridPosition.y}px' 
+>
 
-  <p>
-    Click on the Tauri, Vite, and Svelte logos to learn more.
-  </p>
-
-  <div class="row">
-    <Greet />
-  </div>
-
-
-</main>
-
-<style>
-  .logo.vite:hover {
-    filter: drop-shadow(0 0 2em #747bff);
-  }
-
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00);
-  }
-</style>
+</div>
